@@ -1,0 +1,65 @@
+##Kubernetes Setup 
+
+## on Master and Worker Node 
+
+step 1: 
+-------------
+
+sudo apt update 
+
+sudo su
+
+apt-get install docker.io -y
+
+sudo service docker restart
+
+sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update 
+
+### install kubeadm
+
+sudo apt install kubeadm=1.20.0-00 kubectl=1.20.0-00 kubelet=1.20.0-00 -y
+
+
+
+Step 2 :
+----------
+
+on Master node Run below 
+------------------------------
+
+kubeadm init --pod-network-cidr=192.168.0.0/16
+
+Above command on the master node will generate the command like below to run on the worker node
+
+kubeadm join 172.31.62.49:6443 --token cl8yzn.w7j6uitbsp5btys1 \
+    --discovery-token-ca-cert-hash sha256:50249a242be4a8f6ca7a00b07d9dfaec9d88ef9c0eeedc4d1d5b61fa9ae78c8b
+
+copy this command and run on your worker node to connect with master node 
+
+
+step 3 : 
+-------------
+run on master
+
+
+NOw, go to master node and run below commands , these commands will be there on master generated with above command
+
+come out of root user first and then run below command, basically we are chekcing and updating config files 
+
+mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+step 4 :
+-------------
+
+run on master 
+
+kubectl apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.49.0/deploy/static/provider/baremetal/deploy.yaml
